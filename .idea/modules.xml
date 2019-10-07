@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/SinaCrawler.iml" filepath="$PROJECT_DIR$/.idea/SinaCrawler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sina-crawler/map-bean-converter.iml" filepath="$PROJECT_DIR$/sina-crawler/map-bean-converter.iml" />
     </modules>
   </component>
 </project>
