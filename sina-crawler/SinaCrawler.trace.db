@@ -791,3 +791,29 @@ Caused by: org.h2.jdbc.JdbcSQLInvalidAuthorizationSpecException: Wrong user name
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:459)
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:427)
 	... 16 more
+2019-10-08 15:29:31 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE LINKS_TOBE_PROCESSED
+URL[*] VARCHAR(1000) "; SQL statement:
+create table links_tobe_processed
+url varchar(1000) [42000-199]
+2019-10-08 15:29:38 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE LINKS_TOBE_PROCESSED,[*]
+URL VARCHAR(1000) "; SQL statement:
+create table links_tobe_processed,
+url varchar(1000) [42000-199]
+2019-10-08 15:30:19 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE LINKS_TOBE_PROCESSED,[*]
+URL VARCHAR(1000) "; SQL statement:
+create table links_tobe_processed,
+url varchar(1000) [42000-199]
+2019-10-08 15:30:21 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "CREATE TABLE LINKS_TOBE_PROCESSED,[*]
+URL VARCHAR(1000) "; SQL statement:
+create table links_tobe_processed,
+url varchar(1000) [42000-199]
+2019-10-08 15:30:39 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "create table links_tobe_processed{
+url varchar(1000[*])" [42000-199]
+2019-10-08 16:10:03 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "SINA_NEW" not found; SQL statement:
+delete from sina_new where id=3 [42102-199]
