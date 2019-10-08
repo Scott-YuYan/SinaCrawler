@@ -127,7 +127,6 @@ public class SinaCrawler {
         return document.select("section").select("p").text();
     }
 
-    //随便加句话
     private static void showContent(HashMap<String, String> hashMap) throws IOException {
         Set<String> url = hashMap.keySet();
         for (String s : url
