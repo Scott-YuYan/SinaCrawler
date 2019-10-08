@@ -67,18 +67,18 @@ public class SinaCrawler {
      * Get a database name and the url which you want insert into database.
      *
      * @param connection Database connection.
-     * @param webUrl        Insert the url into database.
-     * @param sqlName        Which database you want alter.
+     * @param webUrl     Insert the url into database.
+     * @param sqlName    Which database you want alter.
      */
 
     private static void insertUrlToDatabase(Connection connection, String webUrl, String sqlName) throws SQLException {
-        List<String> list = executeSelectSqlCommendAndGetResultSet("select url from "+sqlName);
-        if (list.contains(webUrl)){
+        List<String> list = executeSelectSqlCommendAndGetResultSet("select url from " + sqlName);
+        if (list.contains(webUrl)) {
             throw new IllegalStateException("该链接已经存在，为避免死循环，拒绝插入该链接");
         }
         try (PreparedStatement preparedStatement = connection.prepareStatement("insert into ?(url) values('?'")) {
-            preparedStatement.setString(1,sqlName);
-            preparedStatement.setString(2,webUrl);
+            preparedStatement.setString(1, sqlName);
+            preparedStatement.setString(2, webUrl);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -127,6 +127,7 @@ public class SinaCrawler {
         return document.select("section").select("p").text();
     }
 
+    //随便加句话
     private static void showContent(HashMap<String, String> hashMap) throws IOException {
         Set<String> url = hashMap.keySet();
         for (String s : url
