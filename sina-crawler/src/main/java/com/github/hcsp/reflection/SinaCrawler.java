@@ -20,32 +20,20 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SinaCrawler {
-    private static final String url = "https://www.sina.cn";
     private static final String jdbcUrl = "jdbc:h2:file:H:/github item/SinaCrawler/sina-crawler/SinaCrawler";
+    private static final String user = "root";
+    private static final String password = "password";
 
     public static void main(String[] args) throws IOException, SQLException {
-        Document document = getUrlDocument(url);
-        HashMap<String, String> hashMap = getUrlPool(document);
-        showContent(hashMap);
-    }
-
-    private static List<String> executeSelectSqlCommendAndGetResultSet(String sqlCommend) throws SQLException {
-        List<String> urlFromDatabase = new ArrayList<>();
-        Connection connection = DriverManager.getConnection(jdbcUrl, "root", "password");
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlCommend)) {
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                urlFromDatabase.add(resultSet.getString(1));
-            }
-        }
-        return urlFromDatabase;
+        Connection connection = DriverManager.getConnection(jdbcUrl, user, password);
+        insertLinksTobeProcessedUrlToDataBase(connection);
+        filterUrlAndInsertToAlreadyDatabase(connection);
+        getUsefulContentAndInsertIntoSinaNewDataBase(connection);
+        showResult(connection);
     }
 
 
@@ -63,60 +51,101 @@ public class SinaCrawler {
         }
     }
 
-    /**
-     * Get a database name and the url which you want insert into database.
-     *
-     * @param connection Database connection.
-     * @param webUrl     Insert the url into database.
-     * @param sqlName    Which database you want alter.
-     */
-
-    private static void insertUrlToDatabase(Connection connection, String webUrl, String sqlName) throws SQLException {
-        List<String> list = executeSelectSqlCommendAndGetResultSet("select url from " + sqlName);
-        if (list.contains(webUrl)) {
-            throw new IllegalStateException("该链接已经存在，为避免死循环，拒绝插入该链接");
-        }
-        try (PreparedStatement preparedStatement = connection.prepareStatement("insert into ?(url) values('?'")) {
-            preparedStatement.setString(1, sqlName);
-            preparedStatement.setString(2, webUrl);
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+    private static void showResult(Connection connection) throws SQLException {
+        String sqlComment = "select id,url,title,content from sina_news";
+        PreparedStatement preparedStatement = connection.prepareStatement(sqlComment);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            System.out.println(resultSet.getString("title"));
+            System.out.println(resultSet.getString("content"));
+            System.out.println(resultSet.getString("url"));
         }
     }
 
 
-    private static HashMap<String, String> getUrlPool(Document document) {
-        HashMap<String, String> result = new HashMap<>();
-        List<Element> newsList = document.select("section").select("a");
+    private static void insertLinksTobeProcessedUrlToDataBase(Connection connection) throws SQLException, IOException {
+        String sqlSelectCommend = "select url from  LINKS_TOBE_PROCESSED";
+        List<String> list = executeSelectSqlCommendAndGetResultSet(connection, sqlSelectCommend);
+        List<String> result = new ArrayList<>();
+        for (String url : list
+        ) {
+            //根据数据库中初始的网站主页，获取主页中各个新闻的链接
+            Document document = getUrlDocument(url);
+            //将获取的网址加入结果集中
+            result.addAll(getUrlFromWeb(document));
+            System.out.println(result);
+        }
+        //将获取的链接，加入待处理数据库中
+        PreparedStatement preparedStatement = connection.prepareStatement
+                ("insert into LINKS_TOBE_PROCESSED(url) values(?)");
+        for (String urlFromList : result
+        ) {
+            preparedStatement.setString(1, urlFromList);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    private static void filterUrlAndInsertToAlreadyDatabase(Connection connection) throws SQLException {
+        List<String> resultSetFromTobe = executeSelectSqlCommendAndGetResultSet(connection, "select url from LINKS_TOBE_PROCESSED");
         Pattern pattern = Pattern.compile("(\\b(http|https)(.*)(pos=108)\\b)");
+        while (!resultSetFromTobe.isEmpty()) {
+            String link = resultSetFromTobe.remove(resultSetFromTobe.size() - 1);
+            boolean flag = false;
+            try (PreparedStatement preparedStatement = connection.prepareStatement("select url from LINKS_ALREADY_PROCESSED WHERE URL=?")) {
+                preparedStatement.setString(1, link);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    flag = true;
+                }
+
+            }
+            if (flag) {
+                continue;
+            }
+            if (pattern.matcher(link).find()) {
+                try (PreparedStatement preparedStatement = connection.prepareStatement("insert into LINKS_ALREADY_PROCESSED(url) values ?")) {
+                    if (pattern.matcher(link).find()) {
+                        preparedStatement.setString(1, link);
+                        preparedStatement.executeUpdate();
+                    }
+                }
+            }
+        }
+    }
+
+    private static void getUsefulContentAndInsertIntoSinaNewDataBase(Connection connection) throws SQLException, IOException {
+        List<String> resultSet = executeSelectSqlCommendAndGetResultSet(connection, "select url from LINKS_ALREADY_PROCESSED");
+        while (!resultSet.isEmpty()) {
+            String url = resultSet.remove(resultSet.size() - 1);
+            Document document = getUrlDocument(url);
+            String content = getContent(url);
+            String title = document.select("section").select("article").select("h1").text();
+            if (!title.isEmpty() && !content.isEmpty()) {
+                try (PreparedStatement preparedStatement = connection.prepareStatement
+                        ("insert into SINA_NEWS(title,url,content,create_time,modify_time) values(?,?,?,current_timestamp,current_timestamp)")) {
+                    preparedStatement.setString(1, title);
+                    preparedStatement.setString(2, url);
+                    preparedStatement.setString(3, content);
+                    preparedStatement.executeUpdate();
+                }
+            }
+        }
+    }
+
+    private static List<String> getUrlFromWeb(Document document) {
+        List<String> result = new ArrayList<>();
+        List<Element> newsList = document.select("section").select("a");
         for (Element e : newsList
         ) {
-            String title = e.attr("title");
-            String urlPool = e.attr("href");
-            Matcher matcher = pattern.matcher(urlPool);
-            if ((!title.isEmpty()) && (matcher.find())) {
-                result.put(title, urlPool);
+            String regex = "(http|https)(.*)";
+            Pattern pattern = Pattern.compile(regex);
+            String hrefTag = e.attr("href");
+            if (pattern.matcher(hrefTag).find()) {
+                result.add(hrefTag);
             }
         }
         return result;
     }
-
-//    private static HashMap<String, String> getUrlPool(Document document) {
-//        HashMap<String, String> result = new HashMap<>();
-//        List<Element> newsList = document.select("section").select("a");
-//        Pattern pattern = Pattern.compile("(\\b(http|https)(.*)(pos=108)\\b)");
-//        for (Element e : newsList
-//        ) {
-//            String title = e.attr("title");
-//            String urlPool = e.attr("href");
-//            Matcher matcher = pattern.matcher(urlPool);
-//            if ((!title.isEmpty()) && (matcher.find())) {
-//                result.put(title, urlPool);
-//            }
-//        }
-//        return result;
-//    }
 
 
     private static String getContent(String url) throws IOException {
@@ -127,19 +156,15 @@ public class SinaCrawler {
         return document.select("section").select("p").text();
     }
 
-    private static void showContent(HashMap<String, String> hashMap) throws IOException {
-        Set<String> url = hashMap.keySet();
-        for (String s : url
-        ) {
-            String webUrl = hashMap.get(s);
-            String content = getContent(webUrl);
-            if (!content.isEmpty()) {
-                System.out.println("新闻标题：" + s);
-                System.out.println("新闻链接：" + webUrl);
-                System.out.println("新闻内容：" + content);
-                System.out.println();
+    private static List<String> executeSelectSqlCommendAndGetResultSet(Connection connection, String sqlCommend) throws SQLException {
+        List<String> urlFromDatabase = new ArrayList<>();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlCommend)) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                urlFromDatabase.add(resultSet.getString("url"));
             }
         }
+        return urlFromDatabase;
     }
 }
 
