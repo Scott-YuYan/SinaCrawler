@@ -15,24 +15,34 @@ public class FinalizeEscapeGC {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        SAVE_HOOK = new FinalizeEscapeGC();
+//        SAVE_HOOK = new FinalizeEscapeGC();
+//
+//        SAVE_HOOK = null;
+//        System.gc();
+//        Thread.sleep(500);
+//        if (SAVE_HOOK != null) {
+//            SAVE_HOOK.isAlive();
+//        } else {
+//            System.out.println("i am dead");
+//        }
+//
+//        SAVE_HOOK = null;
+//        System.gc();
+//        Thread.sleep(500);
+//        if (SAVE_HOOK != null) {
+//            SAVE_HOOK.isAlive();
+//        } else {
+//            System.out.println("i am dead");
+//        }
+        test();
+    }
 
-        SAVE_HOOK = null;
-        System.gc();
-        Thread.sleep(500);
-        if (SAVE_HOOK != null) {
-            SAVE_HOOK.isAlive();
+    public static void test() {
+        boolean m = false;
+        if (m = false) {
+            System.out.println("false");
         } else {
-            System.out.println("i am dead");
-        }
-
-        SAVE_HOOK = null;
-        System.gc();
-        Thread.sleep(500);
-        if (SAVE_HOOK != null) {
-            SAVE_HOOK.isAlive();
-        } else {
-            System.out.println("i am dead");
+            System.out.println("true");
         }
     }
 }
