@@ -2,6 +2,8 @@ package com.github.hcsp.reflection;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -23,7 +25,6 @@ import java.util.regex.Pattern;
 
 public class Test {
     private static final String url = "https://www.sina.cn";
-    private static final String jdbcUrl = "jdbc:h2:file:H:/github item/SinaCrawler/sina-crawler/SinaCrawler";
 
     public static void main(String[] args) throws IOException, SQLException {
         Document document = getUrlDocument(url);
@@ -32,7 +33,10 @@ public class Test {
     }
 
     private static Document getUrlDocument(String url) throws IOException {
-        CloseableHttpClient httpclient = HttpClients.createDefault();
+        CloseableHttpClient httpclient = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
         HttpGet httpGet = new HttpGet(url);
         httpGet.setHeader("user-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36");
         try (CloseableHttpResponse response1 = httpclient.execute(httpGet)) {
@@ -48,7 +52,9 @@ public class Test {
     private static HashMap<String, String> getUrlPool(Document document) {
         HashMap<String, String> result = new HashMap<>();
         List<Element> newsList = document.select("section").select("a");
-        Pattern pattern = Pattern.compile("(\\b(http|https)(.*)(pos=108)\\b)");
+        //#j_card_intenews > a:nth-child(7)
+        //#j_card_intenews > a:nth-child(6)
+        Pattern pattern = Pattern.compile("(\\b(http|https)(.*)(his=0)\\b)");
         for (Element e : newsList
         ) {
             String title = e.attr("title");
@@ -72,15 +78,17 @@ public class Test {
 
     private static void showContent(HashMap<String, String> hashMap) throws IOException {
         Set<String> url = hashMap.keySet();
-        url.forEach(s -> {
-            System.out.println("新闻标题" + s);
-            System.out.println("新闻链接" + hashMap.get(s));
-            try {
-                System.out.println("新闻内容" + getContent(s));
-            } catch (IOException e) {
-                e.printStackTrace();
+        for (String s : url
+        ) {
+            String webUrl = hashMap.get(s);
+            String content = getContent(webUrl);
+            if (!content.isEmpty()) {
+                System.out.println("新闻标题：" + s);
+                System.out.println("新闻链接：" + webUrl);
+                System.out.println("新闻内容：" + content);
+                System.out.println();
             }
-        });
+        }
     }
 }
 

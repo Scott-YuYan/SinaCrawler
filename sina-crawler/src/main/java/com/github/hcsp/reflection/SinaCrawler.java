@@ -3,8 +3,6 @@ package com.github.hcsp.reflection;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -41,10 +39,7 @@ public class SinaCrawler {
 
 
     private static Document getUrlDocument(String url) throws IOException {
-        CloseableHttpClient httpclient = HttpClients.custom()
-                .setDefaultRequestConfig(RequestConfig.custom()
-                        .setCookieSpec(CookieSpecs.STANDARD).build())
-                .build();
+        CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(url);
         httpGet.setHeader("user-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36");
         try (CloseableHttpResponse response1 = httpclient.execute(httpGet)) {
@@ -110,7 +105,7 @@ public class SinaCrawler {
                 continue;
             }
             if (pattern.matcher(link).find()) {
-                try (PreparedStatement preparedStatement = connection.prepareStatement("insert into LINKS_ALREADY_PROCESSED(url) values ?")) {
+                try (PreparedStatement preparedStatement = connection.prepareStatement("insert into 11(url) values ?")) {
                     if (pattern.matcher(link).find()) {
                         preparedStatement.setString(1, link);
                         preparedStatement.executeUpdate();
