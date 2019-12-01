@@ -1,5 +1,6 @@
-DROP TABLE NEWS IF
-
+DROP TABLE IF EXISTS NEWS;
+DROP TABLE IF EXISTS LINKS_ALREADY_PROCESSED;
+DROP TABLE IF EXISTS LINKS_TOBE_PROCESSED;
 create table NEWS(
 id int not null primary key auto_increment,
 url varchar(1000),

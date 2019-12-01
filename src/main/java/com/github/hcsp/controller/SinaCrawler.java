@@ -1,6 +1,7 @@
 package com.github.hcsp.controller;
 
 import com.github.hcsp.dao.JdbcCrawlerDao;
+import com.github.hcsp.entity.News;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.CookieSpecs;
@@ -19,6 +20,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +48,7 @@ public class SinaCrawler extends Thread {
 
 
     @SuppressWarnings("OBL_UNSATISFIED_OBLIGATION")
-    private synchronized void insertLinksTobeProcessedUrlToDataBase() throws SQLException, IOException {
+    private void insertLinksTobeProcessedUrlToDataBase() throws SQLException, IOException {
         List<String> list = dao.selectUrlFromDatabase();
         List<String> result = new ArrayList<>();
         for (String url : list
@@ -66,38 +68,37 @@ public class SinaCrawler extends Thread {
     }
 
     @SuppressWarnings("SA_LOCAL_SELF_ASSIGNMENT")
-    private synchronized void filterUrlAndInsertToAlreadyDatabase() throws SQLException, IOException {
+    private void filterUrlAndInsertToAlreadyDatabase() throws SQLException {
         List<String> resultSetFromTobe = dao.selectUrlFromDatabase();
         while (!resultSetFromTobe.isEmpty()) {
             //从Link最后面拿数据更有效率
             String link = resultSetFromTobe.remove(resultSetFromTobe.size() - 1);
             //保证重复的网址不会被插入已经处理完的数据库中
-            if (!dao.assertNoRepeatUrl(link)) {
-                continue;
+            synchronized (this) {
+                if (!dao.assertNoRepeatUrl(link)) {
+                    continue;
+                }
+                dao.insertIntoAlreadyAndDelete(link);
             }
-            dao.insertIntoAlreadyAndDelete(link);
         }
     }
 
-    private synchronized void getUsefulContentAndInsertIntoSinaNewDataBase() throws SQLException, IOException {
+    private void getUsefulContentAndInsertIntoSinaNewDataBase() throws SQLException, IOException {
         List<String> resultSet = dao.selectUrlFromDatabase();
         while (!resultSet.isEmpty()) {
             String url = resultSet.remove(resultSet.size() - 1);
             Document document = getUrlDocument(url);
             String content = getContent(url);
-            Map<String, Object> map = new HashMap<>();
-            map.put("url", url);
-            map.put("content", content);
             String title = document.select("section").select("article").select("h1").text();
-            map.put("title", title);
+            News news = new News(url,title,content, Instant.now(),Instant.now());
             if (!title.isEmpty() && !content.isEmpty()) {
                 System.out.println(title);
-                dao.insertIntoNewsAndUpdate(map);
+                dao.insertIntoNewsAndUpdate(news);
             }
         }
     }
 
-    private synchronized static List<String> getUrlFromWeb(Document document) {
+    private static List<String> getUrlFromWeb(Document document) {
         List<String> result = new ArrayList<>();
         List<Element> newsList = document.select("section").select("a");
         for (Element e : newsList
@@ -108,7 +109,7 @@ public class SinaCrawler extends Thread {
         return result;
     }
 
-    private synchronized static String getContent(String url) throws IOException {
+    private static String getContent(String url) throws IOException {
         if (url.isEmpty()) {
             throw new NullPointerException("传入的连接池为空");
         }

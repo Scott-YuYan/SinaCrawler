@@ -1,5 +1,6 @@
 package com.github.hcsp.dao;
 
+import com.github.hcsp.entity.News;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -39,9 +40,9 @@ public class JdbcCrawlerDao {
         return urlFromDatabase;
     }
 
-    public void insertIntoNewsAndUpdate(Map<String, Object> hashMap) throws SQLException {
+    public void insertIntoNewsAndUpdate(News news) throws SQLException {
         try (SqlSession sqlSession = sqlSessionFactory.openSession(true)) {
-            sqlSession.insert("insertIntoNewsAndUpdate", hashMap);
+            sqlSession.insert("insertIntoNewsAndUpdate", news);
         }
     }
 
