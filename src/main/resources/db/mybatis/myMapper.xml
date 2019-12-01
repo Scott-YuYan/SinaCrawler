@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MyCrawlerMapper">
+    <select id="selectUrlFromDatabase" resultType="String">
+        select url from LINKS_TOBE_PROCESSED
+    </select>
+    <insert id="insertIntoLINKS_TOBE_PROCESSED" parameterType="String">
+        insert into LINKS_TOBE_PROCESSED(url)
+        values(#{url})
+    </insert>
+    <insert id="insertIntoLINKS_ALREADY_PROCESSED" parameterType="String">
+        insert into LINKS_ALREADY_PROCESSED(url)
+        values(#{url})
+    </insert>
+    <insert id="insertIntoNewsAndUpdate" parameterType="HashMap">
+        insert into NEWS(title,url,content,create_time,modify_time)
+        values(#{title},#{url},#{content},now(),now())
+    </insert>
+    <delete id="deleteFromLINKS_TOBE_PROCESSED" parameterType="String">
+        delete from LINKS_TOBE_PROCESSED where url=(#{url})
+    </delete>
+    <select id="assertNoRepeatUrl" parameterType="String" resultType="String">
+        select url from LINKS_ALREADY_PROCESSED WHERE URL=(#{url})
+    </select>
+</mapper>
+
