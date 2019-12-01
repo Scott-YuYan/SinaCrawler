@@ -36,4 +36,24 @@ public class News {
     public Instant getModifyTime() {
         return modifyTime;
     }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public void setCreateTime(Instant createTime) {
+        this.createTime = createTime;
+    }
+
+    public void setModifyTime(Instant modifyTime) {
+        this.modifyTime = modifyTime;
+    }
 }

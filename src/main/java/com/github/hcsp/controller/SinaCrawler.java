@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,7 +57,7 @@ public class SinaCrawler extends Thread {
             Document document = getUrlDocument(url);
             result.addAll(getUrlFromWeb(document));
         }
-        Pattern pattern = Pattern.compile("^(http|https).*");
+        Pattern pattern = Pattern.compile("^(http|https).*\\d+");
 
         for (String urlFromList : result
         ) {
@@ -84,9 +85,10 @@ public class SinaCrawler extends Thread {
     }
 
     private void getUsefulContentAndInsertIntoSinaNewDataBase() throws SQLException, IOException {
-        List<String> resultSet = dao.selectUrlFromDatabase();
+        List<String> resultSet = dao.selectUrlFromAlreadyDatabase();
         while (!resultSet.isEmpty()) {
             String url = resultSet.remove(resultSet.size() - 1);
+            System.out.println(url);
             Document document = getUrlDocument(url);
             String content = getContent(url);
             String title = document.select("section").select("article").select("h1").text();

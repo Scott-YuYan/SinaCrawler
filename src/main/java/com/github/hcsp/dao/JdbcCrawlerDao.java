@@ -40,6 +40,14 @@ public class JdbcCrawlerDao {
         return urlFromDatabase;
     }
 
+    public List<String> selectUrlFromAlreadyDatabase() {
+        List<String> urlFromDatabase;
+        try (SqlSession session = sqlSessionFactory.openSession()) {
+            urlFromDatabase = session.selectList("selectUrlFromAlreadyDatabase");
+        }
+        return urlFromDatabase;
+    }
+
     public void insertIntoNewsAndUpdate(News news) throws SQLException {
         try (SqlSession sqlSession = sqlSessionFactory.openSession(true)) {
             sqlSession.insert("insertIntoNewsAndUpdate", news);
@@ -60,10 +68,10 @@ public class JdbcCrawlerDao {
     }
 
     public Boolean assertNoRepeatUrl(String url) {
-        List<String> list;
+        int count;
         try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-            list = sqlSession.selectList("assertNoRepeatUrl", url);
+            count = sqlSession.selectOne("assertNoRepeatUrl", url);
         }
-        return list == null;
+        return count == 0;
     }
 }

@@ -6,6 +6,9 @@
     <select id="selectUrlFromDatabase" resultType="String">
         select url from LINKS_TOBE_PROCESSED
     </select>
+    <select id="selectUrlFromAlreadyDatabase" resultType="String">
+        select url from LINKS_ALREADY_PROCESSED
+    </select>
     <insert id="insertIntoLINKS_TOBE_PROCESSED" parameterType="String">
         insert into LINKS_TOBE_PROCESSED(url)
         values(#{url})
@@ -21,8 +24,15 @@
     <delete id="deleteFromLINKS_TOBE_PROCESSED" parameterType="String">
         delete from LINKS_TOBE_PROCESSED where url=(#{url})
     </delete>
-    <select id="assertNoRepeatUrl" parameterType="String" resultType="List">
-        select url from LINKS_ALREADY_PROCESSED WHERE URL=(#{url})
+    <select id="assertNoRepeatUrl" parameterType="String" resultType="int">
+        select count(*) from LINKS_ALREADY_PROCESSED WHERE URL=#{url}
+    </select>
+    <select id="selectCountFromOldNewsDB" resultType="int">
+        select count(*) from NEWS
+    </select>
+    <select id="selectNewFromNews" parameterType="int" resultType="News">
+        select title,url,content,create_time,modify_time
+        from NEWS where id = #{id}
     </select>
 </mapper>
 
