@@ -1,3 +1,5 @@
+DROP TABLE NEWS IF
+
 create table NEWS(
 id int not null primary key auto_increment,
 url varchar(1000),

@@ -129,7 +129,7 @@
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>6.1.0</version>
                 <configuration>
-                    <url>jdbc:mysql://localhost:3306/mysql?useUnicode=true&amp;characterEncoding=utf-8</url>
+                    <url>jdbc:mysql://localhost:3306/sys?useUnicode=true&amp;characterEncoding=utf-8</url>
                     <user>root</user>
                     <password>password</password>
                     <baselineOnMigrate>true</baselineOnMigrate>

@@ -46,7 +46,7 @@ public class SinaCrawler extends Thread {
 
 
     @SuppressWarnings("OBL_UNSATISFIED_OBLIGATION")
-    private void insertLinksTobeProcessedUrlToDataBase() throws SQLException, IOException {
+    private synchronized void insertLinksTobeProcessedUrlToDataBase() throws SQLException, IOException {
         List<String> list = dao.selectUrlFromDatabase();
         List<String> result = new ArrayList<>();
         for (String url : list
@@ -79,8 +79,7 @@ public class SinaCrawler extends Thread {
         }
     }
 
-    private void getUsefulContentAndInsertIntoSinaNewDataBase() throws SQLException, IOException {
-//        "select url from LINKS_ALREADY_PROCESSED"
+    private synchronized void getUsefulContentAndInsertIntoSinaNewDataBase() throws SQLException, IOException {
         List<String> resultSet = dao.selectUrlFromDatabase();
         while (!resultSet.isEmpty()) {
             String url = resultSet.remove(resultSet.size() - 1);
@@ -98,7 +97,7 @@ public class SinaCrawler extends Thread {
         }
     }
 
-    private static List<String> getUrlFromWeb(Document document) {
+    private synchronized static List<String> getUrlFromWeb(Document document) {
         List<String> result = new ArrayList<>();
         List<Element> newsList = document.select("section").select("a");
         for (Element e : newsList
@@ -109,7 +108,7 @@ public class SinaCrawler extends Thread {
         return result;
     }
 
-    private static String getContent(String url) throws IOException {
+    private synchronized static String getContent(String url) throws IOException {
         if (url.isEmpty()) {
             throw new NullPointerException("传入的连接池为空");
         }

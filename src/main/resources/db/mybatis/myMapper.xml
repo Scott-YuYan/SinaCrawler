@@ -21,7 +21,7 @@
     <delete id="deleteFromLINKS_TOBE_PROCESSED" parameterType="String">
         delete from LINKS_TOBE_PROCESSED where url=(#{url})
     </delete>
-    <select id="assertNoRepeatUrl" parameterType="String" resultType="String">
+    <select id="assertNoRepeatUrl" parameterType="String" resultType="List">
         select url from LINKS_ALREADY_PROCESSED WHERE URL=(#{url})
     </select>
 </mapper>
