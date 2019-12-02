@@ -17,6 +17,14 @@ public class News {
         this.modifyTime = modifyTime;
     }
 
+    public News(News old) {
+        this.url = old.url;
+        this.title = old.title;
+        this.content = old.content;
+        this.createTime = old.createTime;
+        this.modifyTime = old.modifyTime;
+    }
+
     public String getUrl() {
         return url;
     }

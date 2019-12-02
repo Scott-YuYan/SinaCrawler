@@ -75,12 +75,10 @@ public class SinaCrawler extends Thread {
             //从Link最后面拿数据更有效率
             String link = resultSetFromTobe.remove(resultSetFromTobe.size() - 1);
             //保证重复的网址不会被插入已经处理完的数据库中
-            synchronized (this) {
                 if (!dao.assertNoRepeatUrl(link)) {
                     continue;
                 }
                 dao.insertIntoAlreadyAndDelete(link);
-            }
         }
     }
 
@@ -88,7 +86,6 @@ public class SinaCrawler extends Thread {
         List<String> resultSet = dao.selectUrlFromAlreadyDatabase();
         while (!resultSet.isEmpty()) {
             String url = resultSet.remove(resultSet.size() - 1);
-            System.out.println(url);
             Document document = getUrlDocument(url);
             String content = getContent(url);
             String title = document.select("section").select("article").select("h1").text();

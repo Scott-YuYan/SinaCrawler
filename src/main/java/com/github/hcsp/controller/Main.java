@@ -7,8 +7,11 @@ public class Main {
     @SuppressWarnings("DMI_CONSTANT_DB_PASSWORD")
     public static void main(String[] args) {
         JdbcCrawlerDao dao = new JdbcCrawlerDao();
+        Object lock = new Object();
         for (int i = 0; i < 4; i++) {
-            new SinaCrawler(dao).start();
+            synchronized (lock) {
+                new SinaCrawler(dao).start();
+            }
         }
     }
 }

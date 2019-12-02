@@ -32,7 +32,7 @@
     </select>
     <select id="selectNewFromNews" parameterType="int" resultType="News">
         select title,url,content,create_time,modify_time
-        from NEWS where id = #{id}
+        from NEWS
     </select>
 </mapper>
 
