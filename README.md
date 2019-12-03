@@ -1,4 +1,3 @@
-![网页爬虫](img src=H:\SinaCrawler\src\main\resources\static\crawler.jpg)
 
 #### 项目描述
 
