@@ -16,3 +16,8 @@ docker run --name mysql -p 3306:3306 -v `pwd`/database:/var/lib/mysql -e MYSQL_R
 ```
  * 2.在确保安装了Maven的情况下，使用`mvn flyway:migrate`命令运行数据库初始化命令。建议使用之前先`mvn flyway:clean`清除缓存。
  * 3.本项目在Java8环境下开发的，请确保运行版本高于Java8，否则可能出现部分API不兼容问题。
+ #### 运行环境
+ * JDK环境在8以上，并且保证本机中下载了Docker引擎，以及Maven管理工具。如果是采用虚拟机，请确保本机的3306端口与宿主机之间的3306端口是打通的。
+ #### 联系方式
+ 邮箱：mryuyan@gmail.com
+ 
